@@ -1,15 +1,27 @@
 #ifndef SKYNET_ATOMIC_H
 #define SKYNET_ATOMIC_H
-
+/**************************************************************************
+ * 
+ * 实现原子操作
+ * 三种方法实现
+ * 1. 使用GCC的__sync内建函数实现原子操作
+ * 2. 使用C11的stdatomic.h头文件实现原子操作
+ * 3. 使用C++11的std::atomic头文件实现原子操作
+ * 
+ **************************************************************************/
 #include <stddef.h>
 #include <stdint.h>
 
 #ifdef __STDC_NO_ATOMICS__
-
+//不支持c11的走这边 
+//使用GCC的__sync内建函数实现原子操作 
+//volatile 防止编译器优化
+// 	--> 使用 volatile 可以防止编译器对这些变量进行优化，确保每次使用这些变量时都会从内存中读取最新值，而不是使用寄存器中的副本
 #define ATOM_INT volatile int
 #define ATOM_POINTER volatile uintptr_t
 #define ATOM_SIZET volatile size_t
 #define ATOM_ULONG volatile unsigned long
+//为什么init、load、store不需要保证原子性？
 #define ATOM_INIT(ptr, v) (*(ptr) = v)
 #define ATOM_LOAD(ptr) (*(ptr))
 #define ATOM_STORE(ptr, v) (*(ptr) = v)
@@ -25,11 +37,14 @@
 
 #else
 
+//区分C和C++
 #if defined (__cplusplus)
+//使用C++11的std::atomic头文件实现原子操作 
 #include <atomic>
 #define STD_ std::
 #define atomic_value_type_(p, v) decltype((p)->load())(v) 
 #else
+//使用C11的stdatomic.h头文件实现原子操作 
 #include <stdatomic.h>
 #define STD_
 #define atomic_value_type_(p, v) v

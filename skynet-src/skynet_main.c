@@ -74,6 +74,9 @@ _init_env(lua_State *L) {
 	lua_pop(L,1);
 }
 
+//	C语言标准库的一部分，信号处理相关
+//	用于忽略信号	确保不会因为尝试写入关闭的管道而异常终止，而是忽略这个信号继续执行
+//	如在网络编程中，对端可能随时关闭连接，这时忽略SIGPIPE可以避免程序崩溃。
 int sigign() {
 	struct sigaction sa;
 	sa.sa_handler = SIG_IGN;
